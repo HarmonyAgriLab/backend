@@ -1,0 +1,13 @@
+mysql:
+        host: 127.0.0.1
+        port: 3306
+        username: root
+        password: Sztu1034
+        database: emqx
+
+emqx:
+        username: user
+        password: Sztu1034
+        topic: /Agriculture/#
+        broker: 127.0.0.1
+        port: 1883
