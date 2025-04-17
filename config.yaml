@@ -1,13 +1,13 @@
 mysql:
         host: 127.0.0.1
-        port: 3306
+        port: ****
         username: root
-        password: Sztu1034
-        database: emqx
+        password: ******
+        database: ****
 
 emqx:
         username: user
-        password: Sztu1034
+        password: ******
         topic: /Agriculture/#
         broker: 127.0.0.1
-        port: 1883
+        port: ****
