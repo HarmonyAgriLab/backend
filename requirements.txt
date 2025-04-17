@@ -1,0 +1,6 @@
+fastapi==0.115.12
+uvicorn==0.34.1
+sqlalchemy==2.0.38
+mysql-connector-python==9.3.0
+paho-mqtt==1.6.1
+pymysql==1.1.1
