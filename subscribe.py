@@ -49,26 +49,29 @@ def subscribe(db, cursor, client: mqtt_client):
         if topic_split[2] == 'Air':
             msg_str = message.payload.decode('utf-8')
             msg_json = json.loads(msg_str)
-            air_temp = msg_json['air_temp']
-            air_humid = msg_json['air_humid']
-            device_mac = msg_json['device_mac']
+            mac = msg_json.get('MAC', '')
+            params = msg_json.get('params', '')
+            air_temp = params.get('air_temp', '')
+            air_humid = params.get('air_humid', '')
             insertVal = {
                 'air_temp': air_temp,
                 'air_humid': air_humid,
-                'device_mac': device_mac
+                'device_mac': mac
             }
             insert(db, cursor, 'air',insertVal)
         elif topic_split[2] == 'Soil':
             msg_str = message.payload.decode('utf-8')
             msg_json = json.loads(msg_str)
-            moisture_value = msg_json['moisture_value']
-            temperature_value = msg_json['temperature_value']
-            conductivity_value = msg_json['conductivity_value']
-            pH_value = msg_json['pH_value']
-            nitrogen = msg_json['nitrogen']
-            phosphorus = msg_json['phosphorus']
-            potassium = msg_json['potassium']
-            device_mac = msg_json['device_mac']
+            mac = msg_json.get('MAC', '')
+            params = msg_json.get('params', '')
+            moisture_value = params.get('moisture_value', '')
+            temperature_value = params.get('temperature_value', '')
+            conductivity_value = params.get('conductivity_value', '')
+            pH_value = params.get('pH_value', '')
+            nitrogen = params.get('nitrogen', '')
+            phosphorus = params.get('phosphorus', '')
+            potassium = params.get('potassium', '')
+            device_mac = params.get('device_mac', '')
             insertVal = {
                     'moisture_value': moisture_value,
                     'temperature_value': temperature_value,
@@ -77,7 +80,7 @@ def subscribe(db, cursor, client: mqtt_client):
                     'nitrogen': nitrogen,
                     'phosphorus': phosphorus,
                     'potassium': potassium,
-                    'device_mac': device_mac
+                    'device_mac': mac
             }
             insert(db, cursor, 'soil',insertVal)
         
