@@ -43,32 +43,64 @@ def subscribe(db, cursor, client: mqtt_client):
     def on_message(client, userdata, message):
         topic1 = message.topic
         print(topic1)
+
         topic_split = topic1.split('/')
         print(topic_split)
+
+        if len(topic_split) < 3:
+            print("Invalid topic format")
+            return
+
+        if topic_split[2] not in ['Air', 'Soil']:
+            print(f"Invalid topic type: {topic_split[2]}")
+            return
+
         print(f"topic_split[1]: {topic_split[1]}, topic_split[2]: {topic_split[2]}")
-        if topic_split[2] == 'Air':
+
+        try:
             msg_str = message.payload.decode('utf-8')
             msg_json = json.loads(msg_str)
-            air_temp = msg_json['air_temp']
-            air_humid = msg_json['air_humid']
-            device_mac = msg_json['device_mac']
+            # print(f"msg_json:{msg_json}")
+        except json.JSONDecodeError:
+            print("Invalid JSON format in message payload")
+            return
+
+        mac = msg_json.get('MAC', '')
+        if not mac:
+            print("MAC address is missing or empty")
+            return
+
+        if topic_split[2] == 'Air':
+            params = msg_json.get('params', {})
+            # print(f"params:{params}")
+            air_temp = params.get('air_temp', '')
+            air_humid = params.get('air_humid', '')
+
+            if not air_temp or not air_humid:
+                print("Air temperature or humidity is missing")
+                return
+
             insertVal = {
                 'air_temp': air_temp,
                 'air_humid': air_humid,
-                'device_mac': device_mac
+                'device_mac': mac
             }
+
             insert(db, cursor, 'air',insertVal)
         elif topic_split[2] == 'Soil':
-            msg_str = message.payload.decode('utf-8')
-            msg_json = json.loads(msg_str)
-            moisture_value = msg_json['moisture_value']
-            temperature_value = msg_json['temperature_value']
-            conductivity_value = msg_json['conductivity_value']
-            pH_value = msg_json['pH_value']
-            nitrogen = msg_json['nitrogen']
-            phosphorus = msg_json['phosphorus']
-            potassium = msg_json['potassium']
-            device_mac = msg_json['device_mac']
+            params = msg_json.get('params', {})
+            moisture_value = params.get('moisture_value', '')
+            temperature_value = params.get('temperature_value', '')
+            conductivity_value = params.get('conductivity_value', '')
+            pH_value = params.get('pH_value', '')
+            nitrogen = params.get('nitrogen', '')
+            phosphorus = params.get('phosphorus', '')
+            potassium = params.get('potassium', '')
+            
+            if not all([moisture_value, temperature_value, conductivity_value, pH_value, nitrogen, phosphorus, potassium, device_mac]):
+                print("Some required soil parameters are missing")
+                return
+
             insertVal = {
                     'moisture_value': moisture_value,
                     'temperature_value': temperature_value,
@@ -77,8 +109,9 @@ def subscribe(db, cursor, client: mqtt_client):
                     'nitrogen': nitrogen,
                     'phosphorus': phosphorus,
                     'potassium': potassium,
-                    'device_mac': device_mac
+                    'device_mac': mac
             }
+
             insert(db, cursor, 'soil',insertVal)
         
     client.subscribe(topic)
