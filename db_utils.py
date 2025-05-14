@@ -106,9 +106,11 @@ def get_air_data_every_30_minutes(db: Session):
             .first()
         )
         if result:
+            formatted_upload_time = result.upload_time.strftime('%Y-%m-%d %H:%M:%S')
             tmp_json = {
                 'air_temp': result.air_temp,
-                'air_humid': result.air_humid
+                'air_humid': result.air_humid,
+                'upload_time': formatted_upload_time
             }
             results.append(tmp_json)
             current_time -= timedelta(minutes=30)
@@ -130,10 +132,12 @@ def get_soil_data_every_30_minutes(db: Session):
             .first()
         )
         if result:
+            formatted_upload_time = result.upload_time.strftime('%Y-%m-%d %H:%M:%S')
             tmp_json = {
                 'soil_temp': result.temperature_value,
                 'soil_humid': result.moisture_value,
-                'soil_conductivity': result.conductivity_value
+                'soil_conductivity': result.conductivity_value,
+                'upload_time': formatted_upload_time
             }
             results.append(tmp_json)
             current_time -= timedelta(minutes=30)
