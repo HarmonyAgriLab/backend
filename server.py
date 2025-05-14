@@ -9,6 +9,10 @@ from fastapi.responses import FileResponse
 
 from get_config import *
 
+from models import Air, Soil, AirResponse, SoilResponse
+
+from db_utils import get_air_data_every_30_minutes, get_soil_data_every_30_minutes
+
 from publish import publish_ceiling, publish_fan, publish_curtain, publish_heater
 
 mysql_config_list = get_mysql_config()
@@ -25,59 +29,6 @@ DATABASE_URL = "mysql+mysqlconnector://" + username + ":" + password + "@" + hos
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-# 定义 Air 数据模型
-class Air(Base):
-    __tablename__ = "air"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    air_temp = Column(Float(5, 2), nullable=True)
-    air_humid = Column(Float(5, 2), nullable=True)
-    device_mac = Column(String(20), nullable=True)
-    upload_time = Column(DateTime, nullable=True)
-
-# 定义 Soil 数据模型
-class Soil(Base):
-    __tablename__ = "soil"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    moisture_value = Column(Float(6, 2), nullable=True)
-    temperature_value = Column(Float(6, 2), nullable=True)
-    conductivity_value = Column(Float(6, 2), nullable=True)
-    pH_value = Column(Float(6, 2), nullable=True)
-    nitrogen = Column(Float(6, 2), nullable=True)
-    phosphorus = Column(Float(6, 2), nullable=True)
-    potassium = Column(Float(6, 2), nullable=True)
-    device_mac = Column(String(20), nullable=True)
-    upload_time = Column(DateTime, nullable=True)
-
-# Pydantic 模型用于数据验证和序列化
-class AirResponse(BaseModel):
-    id: int
-    air_temp: float | None
-    air_humid: float | None
-    device_mac: str | None
-    upload_time: datetime | None = Field(None, alias="upload_time")
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S") if v else None
-        }
-
-class SoilResponse(BaseModel):
-    id: int
-    moisture_value: float | None
-    temperature_value: float | None
-    conductivity_value: float | None
-    pH_value: float | None
-    nitrogen: float | None
-    phosphorus: float | None
-    potassium: float | None
-    device_mac: str | None
-    upload_time: datetime | None = Field(None, alias="upload_time")
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S") if v else None
-        }
 
 # FastAPI 应用
 app = FastAPI()
@@ -107,6 +58,18 @@ def get_soil_data(db: Session = Depends(get_db)):
 async def get_image(image_name: str):
     image_path = f'/root/images/{image_name}'
     return FileResponse(image_path, media_type = 'image/png')
+
+# 获取微信打款图片
+@app.get("/photo/wechat")
+async def get_wechat_image():
+    image_path = f'/root/images/eleven_wechat_pay.png'
+    return FileResponse(image_path, media_type = 'image/png')
+
+# 获取支付宝打款图片
+@app.get("/photo/ali")
+async def get_ali_image():
+    image_path = f'/root/images/eleven_ali_pay.jpg'
+    return FileResponse(image_path, media_type = 'image/jpeg')
 
 # 控制棚顶开合
 @app.get("/controll/ceiling/{status}")
@@ -199,6 +162,16 @@ def controll_heater(status: str):
             "code": 1,
             "message": "Fail, unexpected error occurred."
         }
+
+@app.get("/air/latest20")
+def get_air_latest20(db: Session = Depends(get_db)):
+    air_data = get_air_data_every_30_minutes(db)
+    return air_data
+
+@app.get("/soil/latest20")
+def get_soil_latest20(db: Session = Depends(get_db)):
+    soil_data = get_soil_data_every_30_minutes(db)
+    return soil_data
 
 # 启动应用
 if __name__ == "__main__":

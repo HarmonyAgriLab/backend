@@ -1,4 +1,9 @@
 import pymysql
+from sqlalchemy.orm import Session
+
+from datetime import datetime, timedelta
+
+from models import Air, Soil
 
 from get_config import *
 
@@ -87,6 +92,59 @@ def queryAll(cursor, table_name):
     except Exception as e:
         print(f'in query,catch err:{e}')
         return returnVals
+    
+def get_air_data_every_30_minutes(db: Session):
+    results = []
+    current_time = datetime(2025, 4, 19, 21, 40, 55)
+
+    for _ in range(20):
+        result = (
+            db.query(Air)
+            .filter(Air.upload_time <= current_time)
+            .order_by(Air.upload_time.desc())
+            .limit(1)
+            .first()
+        )
+        if result:
+            formatted_upload_time = result.upload_time.strftime('%Y-%m-%d %H:%M:%S')
+            tmp_json = {
+                'air_temp': result.air_temp,
+                'air_humid': result.air_humid,
+                'upload_time': formatted_upload_time
+            }
+            results.append(tmp_json)
+            current_time -= timedelta(minutes=30)
+        else:
+            break
+
+    return results
+
+def get_soil_data_every_30_minutes(db: Session):
+    results = []
+    current_time = datetime(2025, 4, 19, 21, 40, 55)
+
+    for _ in range(20):
+        result = (
+            db.query(Soil)
+            .filter(Soil.upload_time <= current_time)
+            .order_by(Soil.upload_time.desc())
+            .limit(1)
+            .first()
+        )
+        if result:
+            formatted_upload_time = result.upload_time.strftime('%Y-%m-%d %H:%M:%S')
+            tmp_json = {
+                'soil_temp': result.temperature_value,
+                'soil_humid': result.moisture_value,
+                'soil_conductivity': result.conductivity_value,
+                'upload_time': formatted_upload_time
+            }
+            results.append(tmp_json)
+            current_time -= timedelta(minutes=30)
+        else:
+            break
+
+    return results
 
 if __name__=='__main__':
     db, cursor = connect(host, username, password, database)
