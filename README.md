@@ -8,7 +8,57 @@
 
 
 
-3. 将后端仓库克隆到本地
+3. 数据库部署可参考[在 Ubuntu 上安装和配置 MySQL](https://zhuanlan.zhihu.com/p/610793026)
+
+```sql
+mysql -u root -p # 进入mysql客户端，初始部署不需要填入密码，进入后可参考上述文章进行配置密码
+
+create database if not exists emqx; # 创建emqx库
+
+CREATE TABLE `air` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `air_temp` float(5,2) DEFAULT NULL,
+  `air_humid` float(5,2) DEFAULT NULL,
+  `device_mac` varchar(20) DEFAULT NULL,
+  `upload_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci # 创建air表
+
+CREATE TABLE `soil` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `moisture_value` float(6,2) DEFAULT NULL,
+  `temperature_value` float(6,2) DEFAULT NULL,
+  `conductivity_value` float(6,2) DEFAULT NULL,
+  `pH_value` float(6,2) DEFAULT NULL,
+  `nitrogen` float(6,2) DEFAULT NULL,
+  `phosphorus` float(6,2) DEFAULT NULL,
+  `potassium` float(6,2) DEFAULT NULL,
+  `device_mac` varchar(20) DEFAULT NULL,
+  `upload_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci # 创建soil表
+```
+
+
+
+#### 数据库(mysql)简介：
+
+mysql  Ver 8.0.41-0ubuntu0.20.04.1 for Linux on x86_64 ((Ubuntu))
+Current database:	emqx
+Current user:	root@localhost / user@%
+Using delimiter:	;
+Server version:	8.0.41-0ubuntu0.20.04.1 (Ubuntu)
+Protocol version:	10
+Server characterset:	utf8mb4
+Db characterset:	utf8mb4
+Client characterset:	utf8mb4
+Conn.characterset:	utf8mb4
+UNIX socket:	/var/run/mysqld/mysqld.sock
+Binary data as:	Hexadecimal
+
+
+
+4. 将后端仓库克隆到本地
 
    ```bash
    git clone https://github.com/HarmonyAgriLab/backend.git
@@ -16,7 +66,7 @@
 
 
 
-4. 创建虚拟环境并指定python版本
+5. 创建虚拟环境并指定python版本
 
    ```bash
    conda create -n your_conda_env_name python=3.12
@@ -24,7 +74,7 @@
 
 
 
-5. 激活创建的虚拟环境
+6. 激活创建的虚拟环境
 
    ```bash
    conda activate your_conda_env_name
@@ -32,7 +82,7 @@
 
 
 
-6. 安装所需库
+7. 安装所需库
 
    ```bash
    pip install -r requirements.txt
@@ -40,7 +90,7 @@
 
 
 
-7. 后端配置文件config.yaml文件说明
+8. 后端配置文件config.yaml文件说明
 
 ```yaml
 mysql: # mysql配置
@@ -76,19 +126,3 @@ emqx: # emqx订阅发布配置
    python subscribe.py
    ```
 
-   
-
-#### 数据库(mysql)简介：
-
-mysql  Ver 8.0.41-0ubuntu0.20.04.1 for Linux on x86_64 ((Ubuntu))
-Current database:	emqx
-Current user:	root@localhost / user@%
-Using delimiter:	;
-Server version:	8.0.41-0ubuntu0.20.04.1 (Ubuntu)
-Protocol version:	10
-Server characterset:	utf8mb4
-Db characterset:	utf8mb4
-Client characterset:	utf8mb4
-Conn.characterset:	utf8mb4
-UNIX socket:	/var/run/mysqld/mysqld.sock
-Binary data as:	Hexadecimal
