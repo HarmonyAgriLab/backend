@@ -4,3 +4,5 @@ sqlalchemy==2.0.38
 mysql-connector-python==9.3.0
 paho-mqtt==1.6.1
 pymysql==1.1.1
+PyYAML==6.0.2
+cryptography==44.0.1
