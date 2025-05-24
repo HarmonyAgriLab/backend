@@ -75,6 +75,7 @@ def subscribe(db, cursor, client: mqtt_client):
             # print(f"params:{params}")
             air_temp = params.get('air_temp', '')
             air_humid = params.get('air_humid', '')
+            device_mac = mac
 
             if not air_temp or not air_humid:
                 print("Air temperature or humidity is missing")
@@ -83,7 +84,7 @@ def subscribe(db, cursor, client: mqtt_client):
             insertVal = {
                 'air_temp': air_temp,
                 'air_humid': air_humid,
-                'device_mac': mac
+                'device_mac': device_mac
             }
 
             insert(db, cursor, 'air',insertVal)
@@ -96,6 +97,7 @@ def subscribe(db, cursor, client: mqtt_client):
             nitrogen = params.get('nitrogen', '')
             phosphorus = params.get('phosphorus', '')
             potassium = params.get('potassium', '')
+            device_mac = mac
             
             if not all([moisture_value, temperature_value, conductivity_value, pH_value, nitrogen, phosphorus, potassium, device_mac]):
                 print("Some required soil parameters are missing")
@@ -109,7 +111,7 @@ def subscribe(db, cursor, client: mqtt_client):
                     'nitrogen': nitrogen,
                     'phosphorus': phosphorus,
                     'potassium': potassium,
-                    'device_mac': mac
+                    'device_mac': device_mac
             }
 
             insert(db, cursor, 'soil',insertVal)
